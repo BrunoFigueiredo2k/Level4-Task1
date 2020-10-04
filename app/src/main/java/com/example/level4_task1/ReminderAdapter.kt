@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_reminder.view.*
 
-class ReminderAdapter(private val reminders: List<Reminder>) : RecyclerView.Adapter<ReminderAdapter.ViewHolder>(){
+class ReminderAdapter(private val reminders: List<Product>) : RecyclerView.Adapter<ReminderAdapter.ViewHolder>(){
 
     /** Creates and returns a ViewHolder object, inflating a standard layout called simple_list_item_1.*/
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -26,7 +26,7 @@ class ReminderAdapter(private val reminders: List<Reminder>) : RecyclerView.Adap
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun databind(reminder: Reminder) {
+        fun databind(reminder: Product) {
             itemView.tvReminder.text = reminder.reminderText
         }
     }

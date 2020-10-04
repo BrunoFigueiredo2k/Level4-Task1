@@ -12,13 +12,19 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_reminders.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class RemindersFragment : Fragment() {
-    private val reminders = arrayListOf<Reminder>()
+class ShoppingListFragment : Fragment() {
+    private val reminders = arrayListOf<Product>()
     private val reminderAdapter = ReminderAdapter(reminders)
+
+    private val mainScope = CoroutineScope(Dispatchers.Main)
+
+    private lateinit var productRepository: ProductRepository
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -30,8 +36,37 @@ class RemindersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        productRepository = ProductRepository(requireContext())
 
-        initViews()
+        initRv()
+    }
+
+    private fun initRv() {
+        viewManager = LinearLayoutManager(activity)
+        rv_shopping_list.addItemDecoration(
+            DividerItemDecoration(
+                activity,
+                DividerItemDecoration.VERTICAL
+            )
+        )
+        createItemTouchHelper().attachToRecyclerView(rv_shopping_list)
+
+        rv_shopping_list.apply {
+            setHasFixedSize(true)
+            layoutManager = viewManager
+            adapter = productAdapter
+        }
+    }
+
+    private fun getShoppingListFromDatabase() {
+        mainScope.launch {
+            val shoppingList = withContext(Dispatchers.IO) {
+                productRepository.getAllProducts()
+            }
+            this@ShoppingListFragment.shoppingList.clear()
+            this@ShoppingListFragment.shoppingList.addAll(shoppingList)
+            this@ShoppingListFragment.productAdapter.notifyDataSetChanged()
+        }
     }
 
     private fun initViews() {
@@ -47,7 +82,7 @@ class RemindersFragment : Fragment() {
     private fun observeAddReminderResult() {
         setFragmentResultListener(REQ_REMINDER_KEY) { key, bundle ->
             bundle.getString(BUNDLE_REMINDER_KEY)?.let {
-                val reminder = Reminder(it)
+                val reminder = Product(it)
 
                 reminders.add(reminder)
                 reminderAdapter.notifyDataSetChanged()
